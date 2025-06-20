@@ -7,11 +7,11 @@
 
 </head>
 <body >
-    <div id="97e02364b9f1419e8f3929f588abf50d" class="chart-container" style="width:1000px; height:650px; "></div>
+    <div id="d8212a0030444b939c83963a714f9c77" class="chart-container" style="width:1000px; height:650px; "></div>
     <script>
-        var chart_97e02364b9f1419e8f3929f588abf50d = echarts.init(
-            document.getElementById('97e02364b9f1419e8f3929f588abf50d'), 'white', {renderer: 'canvas'});
-        var option_97e02364b9f1419e8f3929f588abf50d = {
+        var chart_d8212a0030444b939c83963a714f9c77 = echarts.init(
+            document.getElementById('d8212a0030444b939c83963a714f9c77'), 'white', {renderer: 'canvas'});
+        var option_d8212a0030444b939c83963a714f9c77 = {
     "animation": true,
     "animationThreshold": 2000,
     "animationDuration": 1000,
@@ -42,10 +42,10 @@
                 {
                     "value": [
                         2,
-                        0,
                         1,
                         1,
-                        0,
+                        1,
+                        1,
                         0,
                         2,
                         1,
@@ -105,8 +105,8 @@
                         2,
                         3,
                         3,
-                        2,
-                        2,
+                        3,
+                        3,
                         3,
                         3,
                         1,
@@ -145,12 +145,12 @@
         },
         {
             "type": "radar",
-            "name": "\u9884\u671f\u76ee\u6807",
+            "name": "\u4e00\u671f\u89c4\u5212",
             "data": [
                 {
                     "value": [
                         4,
-                        4,
+                        3,
                         3,
                         2,
                         2,
@@ -160,17 +160,17 @@
                         2,
                         3,
                         4,
-                        4,
-                        4,
-                        4,
+                        1,
+                        1,
+                        1,
                         2,
                         2,
-                        3,
-                        4,
+                        2.5,
+                        1,
                         2,
                         2
                     ],
-                    "name": "\u9884\u671f\u76ee\u6807"
+                    "name": "\u4e00\u671f\u89c4\u5212"
                 }
             ],
             "label": {
@@ -196,6 +196,60 @@
             "areaStyle": {
                 "opacity": 0
             }
+        },
+        {
+            "type": "radar",
+            "name": "\u4e8c\u671f\u89c4\u5212",
+            "data": [
+                {
+                    "value": [
+                        4,
+                        4,
+                        3,
+                        2,
+                        2,
+                        2,
+                        2,
+                        2,
+                        3,
+                        3,
+                        4,
+                        4,
+                        4,
+                        4,
+                        2,
+                        2,
+                        3,
+                        3,
+                        4,
+                        4
+                    ],
+                    "name": "\u4e8c\u671f\u89c4\u5212"
+                }
+            ],
+            "label": {
+                "show": true,
+                "margin": 8,
+                "valueAnimation": false
+            },
+            "selectedMode": false,
+            "zlevel": 0,
+            "z": 2,
+            "itemStyle": {
+                "normal": {
+                    "color": "orange"
+                }
+            },
+            "lineStyle": {
+                "show": true,
+                "width": 2,
+                "opacity": 1,
+                "curveness": 0,
+                "type": "solid"
+            },
+            "areaStyle": {
+                "opacity": 0
+            }
         }
     ],
     "legend": [
@@ -203,7 +257,8 @@
             "data": [
                 "\u5728\u552e\u4ea7\u54c1",
                 "\u661f\u5d0e/\u4e07\u5229\u591a",
-                "\u9884\u671f\u76ee\u6807"
+                "\u4e00\u671f\u89c4\u5212",
+                "\u4e8c\u671f\u89c4\u5212"
             ],
             "selected": {},
             "show": true,
@@ -359,12 +414,12 @@
                     "min": -1
                 },
                 {
-                    "name": "\u566a\u97f3",
+                    "name": "\u53ef\u9760\u6027",
                     "max": 5,
                     "min": -1
                 },
                 {
-                    "name": "\u53ef\u9760\u6027",
+                    "name": "\u566a\u97f3",
                     "max": 5,
                     "min": -1
                 },
@@ -477,7 +532,7 @@
         }
     ]
 };
-        chart_97e02364b9f1419e8f3929f588abf50d.setOption(option_97e02364b9f1419e8f3929f588abf50d);
+        chart_d8212a0030444b939c83963a714f9c77.setOption(option_d8212a0030444b939c83963a714f9c77);
     </script>
 </body>
 </html>
