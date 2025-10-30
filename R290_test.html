@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>R290 饱和计算 · linkworld</title>
+<style>
+:root{--bg:#121416;--surface:#1b1f23;--ink:#e9eef3;--muted:#a9b3bd;--line:#2a2f35;--accent:#00AEEF;--radius:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;display:flex;justify-content:center;padding:24px}
+.wrap{width:100%;max-width:1000px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.logo-tile{width:72px;height:72px;border-radius:18px;background:transparent;border:0;box-shadow:none;display:grid;place-items:center;overflow:hidden}
+.logo-tile img{width:78%;height:78%;object-fit:contain;display:block}
+h1{margin:0;font:700 22px/1.2 Inter, sans-serif}
+.sub{color:var(--muted);font-size:12px;margin-top:4px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.group{border:1px solid var(--line);border-radius:10px;padding:12px;background:#171b20}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip input{display:none}
+.chip label{padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);cursor:pointer;font-weight:600;background:#12161a}
+.chip input:checked + label{color:var(--ink);border-color:var(--accent)}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.ctrl label{color:var(--muted);font-size:12px}
+input[type=number],select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#0f1215;color:var(--ink);font:600 15px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas}
+input[type=number]:focus,select:focus{border-color:var(--accent)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{border:none;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer;letter-spacing:.2px}
+.primary{background:var(--accent);color:#0c1114}
+.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.result-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#14181b}
+.badges{display:flex;flex-direction:column;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#0f1215}
+.badge .label{color:var(--muted);font:600 11px/1.2 Inter}
+.badge span.value{font:800 18px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas}
+.readout{color:var(--muted);font-size:12px;margin-top:6px}
+.warn{color:#ffb4b4;display:none;margin-top:4px}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.cell{border:1px solid var(--line);border-radius:10px;padding:12px;background:#14181b}
+.cell .label{color:var(--muted);font-size:12px}
+.cell .value{font:800 18px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas;margin-top:6px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+textarea.jsonbox{width:100%;min-height:120px;border:1px solid var(--line);border-radius:8px;padding:8px;background:#0f1215;color:var(--ink);font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas}
+details summary{cursor:pointer;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="logo-tile"><img alt="LinkWorld" src="data:image/png;base64,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"/></div>
+<div>
+<h1>R290 饱和计算</h1>
+<div class="sub">linkworld · 温度 ⇄ 压力（绝压） · 内置密度/潜热，可 CSV/JSON 覆盖</div>
+</div>
+</header>
+<section class="panel">
+<div class="grid">
+<div class="group">
+<div class="row">
+<div class="chip"><input checked="" id="m1" name="mode" type="radio" value="T2P"/><label for="m1">温度 → 压力</label></div>
+<div class="chip"><input id="m2" name="mode" type="radio" value="P2T"/><label for="m2">压力 → 温度</label></div>
+</div>
+<div class="ctrl">
+<div><label>输入值</label><input id="val" placeholder="输入数值，点击“计算”" step="any" type="number"/></div>
+<div><label>单位</label>
+<select id="unit">
+<option value="C">°C</option><option value="F">°F</option>
+<option value="MPa">MPa (abs)</option><option value="bar">bar (abs)</option><option value="kPa">kPa (abs)</option>
+</select>
+</div>
+</div>
+<div class="btns">
+<button class="primary" id="calc">计算</button>
+<button class="ghost" id="copy">复制结果</button>
+<button class="ghost" id="reset">清空</button>
+</div>
+</div>
+<div class="group">
+<div class="result-card">
+<div class="badges">
+<div class="badge"><span class="label">TSAT</span><span class="value" id="tsat">—</span></div>
+<div class="badge"><span class="label">PSAT</span><span class="value" id="psat">—</span></div>
+</div>
+<div class="readout" id="out">结果显示在此</div>
+<div class="warn" id="warn">提示</div>
+</div>
+</div>
+</div>
+</section>
+<section class="panel" style="margin-top:12px">
+<div class="row" style="justify-content:space-between">
+<div style="font-weight:700">按温度插值的物性：ρ<sub>l</sub>（液体密度）、ρ<sub>v</sub>（气体密度）、h<sub>fg</sub>（气化潜热）</div>
+<div class="tools">
+<input accept=".csv" id="csv" style="display:none" type="file"/>
+<button class="ghost" id="loadCsv">加载 CSV</button>
+<button class="ghost" id="useSample">载入示例数据</button>
+</div>
+</div>
+<div class="kpi">
+<div class="cell"><div class="label">ρ<sub>l</sub> 液体密度 [kg/m³]</div><div class="value" id="rho_l_out">—</div></div>
+<div class="cell"><div class="label">ρ<sub>v</sub> 气体密度 [kg/m³]</div><div class="value" id="rho_v_out">—</div></div>
+<div class="cell"><div class="label">h<sub>fg</sub> 气化潜热 [kJ/kg]</div><div class="value" id="hfg_out">—</div></div>
+</div>
+<details style="margin-top:8px">
+<summary>（可选）用 JSON 编辑/粘贴自定义物性</summary>
+<div class="tools" style="margin:8px 0">
+<button class="primary" id="applyJson">应用 JSON</button>
+<button class="ghost" id="downloadJson">下载 JSON</button>
+</div>
+<textarea class="jsonbox" id="jsonbox" placeholder='格式：{"T_C":[..],"rho_l":[..],"rho_v":[..],"h_fg":[..]}
+T_C 与各数组长度一致；单位：T[°C]、ρ[kg/m³]、h_fg[kJ/kg]' spellcheck="false"></textarea>
+</details>
+</section>
+</div>
+<script>
+const SAT_TP = [[-60.0, 0.043], [-59.0, 0.045], [-58.0, 0.047], [-57.0, 0.05], [-56.0, 0.052], [-55.0, 0.055], [-54.0, 0.058], [-53.0, 0.061], [-52.0, 0.064], [-51.0, 0.067], [-50.0, 0.07], [-49.0, 0.074], [-48.0, 0.077], [-47.0, 0.081], [-46.0, 0.085], [-45.0, 0.089], [-44.0, 0.093], [-43.0, 0.097], [-42.0, 0.102], [-41.0, 0.106], [-40.0, 0.111], [-39.0, 0.116], [-38.0, 0.121], [-37.0, 0.126], [-36.0, 0.132], [-35.0, 0.137], [-34.0, 0.143], [-33.0, 0.149], [-32.0, 0.155], [-31.0, 0.161], [-30.0, 0.168], [-29.0, 0.174], [-28.0, 0.181], [-27.0, 0.188], [-26.0, 0.196], [-25.0, 0.203], [-24.0, 0.211], [-23.0, 0.219], [-22.0, 0.227], [-21.0, 0.236], [-20.0, 0.244], [-19.0, 0.253], [-18.0, 0.263], [-17.0, 0.272], [-16.0, 0.282], [-15.0, 0.292], [-14.0, 0.302], [-13.0, 0.312], [-12.0, 0.323], [-11.0, 0.334], [-10.0, 0.345], [-9.0, 0.357], [-8.0, 0.369], [-7.0, 0.381], [-6.0, 0.393], [-5.0, 0.406], [-4.0, 0.419], [-3.0, 0.433], [-2.0, 0.446], [-1.0, 0.46], [0.0, 0.475], [1.0, 0.489], [2.0, 0.504], [3.0, 0.52], [4.0, 0.535], [5.0, 0.551], [6.0, 0.568], [7.0, 0.584], [8.0, 0.602], [9.0, 0.619], [10.0, 0.637], [11.0, 0.655], [12.0, 0.674], [13.0, 0.693], [14.0, 0.712], [15.0, 0.732], [16.0, 0.752], [17.0, 0.773], [18.0, 0.794], [19.0, 0.815], [20.0, 0.837], [21.0, 0.859], [22.0, 0.882], [23.0, 0.905], [24.0, 0.928], [25.0, 0.952], [26.0, 0.977], [27.0, 1.002], [28.0, 1.027], [29.0, 1.053], [30.0, 1.079], [31.0, 1.106], [32.0, 1.133], [33.0, 1.161], [34.0, 1.189], [35.0, 1.218], [36.0, 1.247], [37.0, 1.277], [38.0, 1.308], [39.0, 1.338], [40.0, 1.37], [41.0, 1.402], [42.0, 1.434], [43.0, 1.467], [44.0, 1.5], [45.0, 1.534], [46.0, 1.569], [47.0, 1.604], [48.0, 1.64], [49.0, 1.676], [50.0, 1.713], [51.0, 1.751], [52.0, 1.789], [53.0, 1.828], [54.0, 1.867], [55.0, 1.907], [56.0, 1.948], [57.0, 1.989], [58.0, 2.031], [59.0, 2.073], [60.0, 2.117], [61.0, 2.16], [62.0, 2.205], [63.0, 2.25], [64.0, 2.296], [65.0, 2.343], [66.0, 2.39], [67.0, 2.438], [68.0, 2.487], [69.0, 2.536], [70.0, 2.586], [71.0, 2.637], [72.0, 2.689], [73.0, 2.742], [74.0, 2.795], [75.0, 2.849], [76.0, 2.904], [77.0, 2.959], [78.0, 3.016], [79.0, 3.073], [80.0, 3.132], [81.0, 3.191], [82.0, 3.251], [83.0, 3.311], [84.0, 3.373], [85.0, 3.436], [86.0, 3.499], [87.0, 3.564], [88.0, 3.63], [89.0, 3.696], [90.0, 3.764], [91.0, 3.833], [92.0, 3.903], [93.0, 3.974], [94.0, 4.047], [95.0, 4.12], [96.0, 4.196], [96.675, 4.247]];
+const TEMPS = SAT_TP.map(d=>d[0]);
+const PRESS = SAT_TP.map(d=>d[1]);
+let PROP = {"T_C": [-60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90], "rho_l": [690, 660, 620, 590, 560, 540, 520, 500, 480, 460, 440, 420, 400, 380, 360, 340], "rho_v": [1.0, 1.6, 2.6, 4.0, 6.1, 9.2, 13.5, 19.4, 27.6, 39.1, 55.0, 76.8, 106.9, 148.0, 203.5, 277.0], "h_fg": [440, 430, 420, 410, 395, 380, 365, 350, 330, 310, 290, 270, 250, 225, 195, 160]};
+
+function interp(xList,yList,x){
+  if(x<=xList[0]) return {y:yList[0],clamped:true};
+  if(x>=xList[xList.length-1]) return {y:yList[xList.length-1],clamped:true};
+  let lo=0,hi=xList.length-1;
+  while(lo+1<hi){const mid=(lo+hi)>>1; if(xList[mid]<x) lo=mid; else hi=mid;}
+  const x0=xList[lo],x1=xList[hi],y0=yList[lo],y1=yList[hi];
+  return {y:y0+(y1-y0)*(x-x0)/(x1-x0), clamped:false};
+}
+function CtoF(c){return c*9/5+32} function FtoC(f){return (f-32)*5/9}
+function MPa_to_bar(m){return m*10} function bar_to_MPa(b){return b/10}
+function kPa_to_MPa(k){return k/1000}
+function fmt(v,n){return Number(v).toFixed(n)}
+
+function updateProps(T_C){
+  const rl = document.getElementById('rho_l_out');
+  const rv = document.getElementById('rho_v_out');
+  const hfg = document.getElementById('hfg_out');
+  if(!PROP || !PROP.T_C || PROP.T_C.length<2 || !isFinite(T_C)){
+    rl.textContent='—'; rv.textContent='—'; hfg.textContent='—'; return;
+  }
+  const ip = (arr)=>interp(PROP.T_C, arr, T_C).y;
+  rl.textContent = fmt(ip(PROP.rho_l), 3);
+  rv.textContent = fmt(ip(PROP.rho_v), 3);
+  hfg.textContent = fmt(ip(PROP.h_fg), 3);
+}
+
+function compute(){
+  const mode=document.querySelector('input[name="mode"]:checked').value;
+  const v=parseFloat(document.getElementById('val').value);
+  const unit=document.getElementById('unit').value;
+  const out=document.getElementById('out'), warn=document.getElementById('warn'), ts=document.getElementById('tsat'), ps=document.getElementById('psat');
+  warn.style.display='none'; warn.textContent='';
+  if(Number.isNaN(v)){out.textContent='请输入数字'; ts.textContent='—'; ps.textContent='—'; updateProps(NaN); return;}
+  let T_C,P_MPa,oob=false,msg='';
+  if(mode==='T2P'){
+    if(unit==='F') T_C=FtoC(v); else if(unit==='C') T_C=v; else {out.textContent='单位不匹配：T→P 请选择 °C 或 °F'; updateProps(NaN); return;}
+    if(T_C<TEMPS[0] || T_C>TEMPS[TEMPS.length-1]){oob=true; msg='超出查询范围：支持温度 '+fmt(TEMPS[0],0)+' ~ '+fmt(TEMPS[TEMPS.length-1],0)+' °C，当前 '+fmt(T_C,3)+' °C'}
+    P_MPa=interp(TEMPS,PRESS,T_C).y;
+  } else {
+    if(unit==='MPa') P_MPa=v; else if(unit==='bar') P_MPa=bar_to_MPa(v); else if(unit==='kPa') P_MPa=kPa_to_MPa(v); else {out.textContent='单位不匹配：P→T 请选择 MPa/bar/kPa'; updateProps(NaN); return;}
+    if(P_MPa<PRESS[0] || P_MPa>PRESS[PRESS.length-1]){oob=true; msg='超出查询范围：支持压力 '+fmt(PRESS[0],3)+' ~ '+fmt(PRESS[PRESS.length-1],3)+' MPa(abs)，当前 '+fmt(P_MPa,3)+' MPa'}
+    T_C=interp(PRESS,TEMPS,P_MPa).y;
+  }
+  if(oob){ts.textContent='—'; ps.textContent='—'; out.textContent='无法计算：输入超出可查询范围'; warn.textContent=msg; warn.style.display='block'; updateProps(NaN); return;}
+  ts.textContent=fmt(T_C,3)+' °C  ('+fmt(CtoF(T_C),3)+' °F)';
+  ps.textContent=fmt(P_MPa,5)+' MPa  ('+fmt(MPa_to_bar(P_MPa),5)+' bar)';
+  out.textContent= mode==='T2P' ? ('Psat = '+fmt(P_MPa,5)+' MPa (abs)  @  T = '+fmt(T_C,3)+' °C')
+                               : ('Tsat = '+fmt(T_C,3)+' °C  @  P = '+fmt(P_MPa,5)+' MPa (abs)');
+  updateProps(T_C);
+}
+document.getElementById('calc').addEventListener('click', compute);
+document.getElementById('copy').addEventListener('click', async ()=>{
+  try{await navigator.clipboard.writeText('Tsat: '+document.getElementById('tsat').textContent+'\nPsat: '+document.getElementById('psat').textContent); alert('已复制结果');}
+  catch(e){alert('复制失败');}
+});
+document.getElementById('reset').addEventListener('click', ()=>{
+  document.getElementById('val').value=''; document.getElementById('out').textContent='结果显示在此';
+  document.getElementById('tsat').textContent='—'; document.getElementById('psat').textContent='—';
+  const w=document.getElementById('warn'); w.style.display='none'; w.textContent='';
+  updateProps(NaN);
+});
+function refreshUnit(){
+  const mode=document.querySelector('input[name="mode"]:checked').value, unit=document.getElementById('unit');
+  unit.innerHTML='';
+  if(mode==='T2P'){
+    [['C','°C'],['F','°F']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v; o.textContent=t; unit.appendChild(o);});
+  }else{
+    ['MPa','bar','kPa'].forEach(v=>{const o=document.createElement('option');o.value=v; o.textContent=v; unit.appendChild(o);});
+  }
+}
+document.getElementById('m1').addEventListener('change', refreshUnit);
+document.getElementById('m2').addEventListener('change', refreshUnit);
+refreshUnit();
+
+// CSV/JSON overrides for property table
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const head = lines[0].split(',').map(s=>s.trim());
+  const idx = { T_C: head.indexOf('T_C'), rho_l: head.indexOf('rho_l'), rho_v: head.indexOf('rho_v'), h_fg: head.indexOf('h_fg') };
+  if(idx.T_C<0) throw new Error('CSV 需包含列：T_C');
+  const T=[], RL=[], RV=[], H=[];
+  for(let i=1;i<lines.length;i++){
+    const cols = lines[i].split(',').map(s=>s.trim());
+    if(!cols.length || cols[0]==='') continue;
+    const t = parseFloat(cols[idx.T_C]);
+    const rl = idx.rho_l>=0 ? parseFloat(cols[idx.rho_l]) : NaN;
+    const rv = idx.rho_v>=0 ? parseFloat(cols[idx.rho_v]) : NaN;
+    const h  = idx.h_fg>=0 ? parseFloat(cols[idx.h_fg]) : NaN;
+    if(isFinite(t)){ T.push(t); RL.push(isFinite(rl)?rl:NaN); RV.push(isFinite(rv)?rv:NaN); H.push(isFinite(h)?h:NaN); }
+  }
+  return { T_C:T, rho_l:RL, rho_v:RV, h_fg:H };
+}
+function applyProp(obj){
+  if(!obj || !obj.T_C || obj.T_C.length<2){ alert('属性数据不足（至少 2 个温度点）'); return; }
+  // sort by T_C
+  const idx = Array.from(obj.T_C.keys()).sort((a,b)=>obj.T_C[a]-obj.T_C[b]);
+  PROP = { T_C: idx.map(i=>obj.T_C[i]), rho_l: idx.map(i=>obj.rho_l[i]), rho_v: idx.map(i=>obj.rho_v[i]), h_fg: idx.map(i=>obj.h_fg[i]) };
+  document.getElementById('jsonbox').value = JSON.stringify(PROP, null, 2);
+  alert('属性数据已载入');
+}
+document.getElementById('loadCsv').addEventListener('click', ()=>document.getElementById('csv').click());
+document.getElementById('csv').addEventListener('change', (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{ try{ applyProp(parseCSV(fr.result)); } catch(err){ alert('CSV 解析失败: '+err.message); } };
+  fr.readAsText(file);
+});
+document.getElementById('applyJson').addEventListener('click', ()=>{
+  try{ applyProp(JSON.parse(document.getElementById('jsonbox').value)); }
+  catch(err){ alert('JSON 无法解析: '+err.message); }
+});
+document.getElementById('downloadJson').addEventListener('click', ()=>{
+  const blob = new Blob([document.getElementById('jsonbox').value||'{}'], {type:'application/json'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'R290_props_linkworld.json'; a.click(); URL.revokeObjectURL(url);
+});
+document.getElementById('useSample').addEventListener('click', ()=>{
+  applyProp({"T_C": [-60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90], "rho_l": [690, 660, 620, 590, 560, 540, 520, 500, 480, 460, 440, 420, 400, 380, 360, 340], "rho_v": [1.0, 1.6, 2.6, 4.0, 6.1, 9.2, 13.5, 19.4, 27.6, 39.1, 55.0, 76.8, 106.9, 148.0, 203.5, 277.0], "h_fg": [440, 430, 420, 410, 395, 380, 365, 350, 330, 310, 290, 270, 250, 225, 195, 160]});
+});
+</script>
+</body>
+</html>
